@@ -63,7 +63,7 @@ def train_tokenizer(dir, alg, vocab_size):
     start_time = time.time()
 
     spm.SentencePieceTrainer.Train(f'--input={data_file} --model_prefix={model_prefix} --vocab_size={vocab_size} --model_type={alg} --max_sentence_length={max_sentence_length} --minloglevel=1')
-    
+
     print_elapsed_time(start_time, time.time())
     print_memory_usage('processing done')
     print_output_filepath(model_prefix)
@@ -81,21 +81,21 @@ def use_tokenizer(model_prefix):
     sp.load(vocab_file)
 
     lines = [
-        "개교표어",
         "19.대종사 말씀하시기를 [스승이 법을 새로 내는 일이나, 제자들이 그 법을 받아서 후래 대중에게 전하는 일이나, 또 후래 대중이 그 법을 반가이 받들어 실행하는 일이 삼위 일체(三位一體)되는 일이라, 그 공덕도 또한 다름이 없나니라.]",
-        "원불교는 대종사께서 창시하셨고 일원상 진리를 가르치신다."
+        "원불교는 대종사께서 창시하셨고 일원상 진리를 가르치신다.",
+        "개교표어"
     ]
     for line in lines:
         print('================================================================')
         print(line)
         print()
         print(sp.encode_as_pieces(line))
-        print()
-        print(sp.encode_as_ids(line))
-        print()
+        #print()
+        #print(sp.encode_as_ids(line))
+        #print()
 
-        print(sp.encode('개교표어', out_type=str))
-        print(sp.encode('개교표어', out_type=int))
+    #print(sp.encode('개교표어', out_type=str))
+    #print(sp.encode('개교표어', out_type=int))
 
 def main(args):
     dir = args.dir
