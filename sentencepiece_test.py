@@ -28,15 +28,8 @@ def print_output_filepath(filepath, message=''):
     message = f' ({message})' if len(message) > 0 else ''
     print(f'*** OUTPUT FILE{message}: {filepath}')
 
-################################################################################
-# Variables
-################################################################################
-
-max_sentence_length = 9999
-
-################################################################################
-# Main
-################################################################################
+def scan_dir(dir):
+    return glob.glob(os.path.join(dir, '**', '*.txt'))
 
 def train_tokenizer(dir, alg, vocab_size):
     # How to decide: 8352, 24707?
@@ -45,11 +38,11 @@ def train_tokenizer(dir, alg, vocab_size):
     if not os.path.isdir(dir):
         raise Exception('Directory not found: ' + dir)
     
-    dir = os.path.abspath(dir)
+    #dir = os.path.abspath(dir)
     basename = os.path.basename(dir)
     
     # 훈련용 텍스트 파일 목록 만들기
-    files = glob.glob(os.path.join(dir, '*.txt'))
+    files = scan_dir(dir)
     data_file = ','.join(files)
 
     # 결과 디렉토리 만들기
@@ -62,7 +55,14 @@ def train_tokenizer(dir, alg, vocab_size):
     # 토크나이저 훈련
     start_time = time.time()
 
-    spm.SentencePieceTrainer.Train(f'--input={data_file} --model_prefix={model_prefix} --vocab_size={vocab_size} --model_type={alg} --max_sentence_length={max_sentence_length} --minloglevel=1')
+    spm.SentencePieceTrainer.Train(
+        f'--input={data_file}' + 
+        f' --model_prefix={model_prefix}' + 
+        f' --vocab_size={vocab_size}' + 
+        f' --model_type={alg}' + 
+        f' --max_sentence_length={max_sentence_length}' + 
+        f' --minloglevel=3'
+    )
 
     print_elapsed_time(start_time, time.time())
     print_memory_usage('processing done')
@@ -77,18 +77,21 @@ def use_tokenizer(model_prefix):
 
     # 토크나이저 사용
     sp = spm.SentencePieceProcessor()
-    vocab_file = f"{model_prefix}.model"
+    vocab_file = f'{model_prefix}.model'
     sp.load(vocab_file)
 
     lines = [
-        "19.대종사 말씀하시기를 [스승이 법을 새로 내는 일이나, 제자들이 그 법을 받아서 후래 대중에게 전하는 일이나, 또 후래 대중이 그 법을 반가이 받들어 실행하는 일이 삼위 일체(三位一體)되는 일이라, 그 공덕도 또한 다름이 없나니라.]",
-        "원불교는 대종사께서 창시하셨고 일원상 진리를 가르치신다.",
-        "개교표어"
+        '19.대종사 말씀하시기를 [스승이 법을 새로 내는 일이나, 제자들이 그 법을 받아서 후래 대중에게 전하는 일이나, 또 후래 대중이 그 법을 반가이 받들어 실행하는 일이 삼위 일체(三位一體)되는 일이라, 그 공덕도 또한 다름이 없나니라.]',
+        '원불교는 대종사께서 창시하셨고 일원상 진리를 가르치신다.',
+        '영광 길룡리 해변을 간척하다.',
+        '천지는 대소유무의 이치를 따라 무심(無心)으로 운행할 뿐이기 때문이다.',
+        '일원상의 수행은 삼학 팔조를 통해 삼대력을 얻어 무시선 무처선에 이르는 길',
+        '개교표어'
     ]
     for line in lines:
-        print('================================================================')
-        print(line)
-        print()
+        print('--------------------------------------------------------------------------------')
+        print(f'{line}')
+        #print()
         print(sp.encode_as_pieces(line))
         #print()
         #print(sp.encode_as_ids(line))
@@ -96,6 +99,16 @@ def use_tokenizer(model_prefix):
 
     #print(sp.encode('개교표어', out_type=str))
     #print(sp.encode('개교표어', out_type=int))
+
+################################################################################
+# Variables
+################################################################################
+
+max_sentence_length = 9999
+
+################################################################################
+# Main
+################################################################################
 
 def main(args):
     dir = args.dir
